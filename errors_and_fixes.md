@@ -51,6 +51,38 @@ JOIN family parent ON child.parent_id = parent.id;
 ```
 A self join needs the same table twice with two different aliases, and the ON clause must use those aliases.
 
+## 4. Double quotes around a string (19 Aug 2025)
+
+**Query**
+```sql
+SELECT * FROM employees
+WHERE dept_id IN (SELECT dept_id FROM employees WHERE emp_name = "John");
+```
+**PostgreSQL said:** `column "John" does not exist`
+
+**Fix**
+```sql
+SELECT * FROM employees
+WHERE dept_id IN (SELECT dept_id FROM employees WHERE emp_name = 'John');
+```
+In PostgreSQL double quotes mean an identifier (a column), single quotes mean a string.
+
+## 6. Correlated subquery without the outer alias (19 Aug 2025)
+
+**Query**
+```sql
+SELECT emp_name FROM employees
+WHERE e.salary > (SELECT AVG(salary) FROM employees WHERE dept_id = e.dept_id);
+```
+**PostgreSQL said:** `missing FROM-clause entry for table "e"`
+
+**Fix**
+```sql
+SELECT emp_name FROM employees e
+WHERE e.salary > (SELECT AVG(salary) FROM employees WHERE dept_id = e.dept_id);
+```
+The outer table needs the alias `e` for the inner query to refer to it.
+
 ## 8. LIMIT syntax error (17 Aug 2025)
 
 PostgreSQL returned `ERROR: syntax error at or near "LIMIT"` (SQL state 42601) while practising `ORDER BY` with `LIMIT`. The query that caused it was not saved. The working form is `SELECT ... FROM payment ORDER BY amount DESC LIMIT 3;` (LIMIT last, after ORDER BY).
