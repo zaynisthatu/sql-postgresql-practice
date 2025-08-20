@@ -1,6 +1,8 @@
 # Errors and fixes
 
-## 1. IN without brackets and wrong column (17 Aug 2025)
+Errors met during the August 2025 practice sessions, each with PostgreSQL's error message and the corrected query. Every query was re-run on PostgreSQL 16 against `schema.sql`. `verbatim` marks a query as written in the session, `shortened` a shorter form of the session's query, and `re-created` the same error rebuilt on this schema because the original used the Chinook sample database, which is not included.
+
+## 1. IN without brackets and wrong column (17 Aug 2025, verbatim)
 
 **Query**
 ```sql
@@ -16,7 +18,7 @@ WHERE mode IN ('Cash', 'Credit Card');
 ```
 `IN` needs a bracketed list, and the filter was on `amount` instead of `mode`.
 
-## 2. Comma missing and wrong alias syntax (18 Aug 2025)
+## 2. Comma missing and wrong alias syntax (18 Aug 2025, verbatim)
 
 **Query**
 ```sql
@@ -34,7 +36,7 @@ JOIN family a2 ON a1.parent_id = a2.id;
 ```
 A comma between select items, and an alias goes after the table name (`family a1`), not `family.a1`.
 
-## 3. Self join with wrong aliases (18 Aug 2025)
+## 3. Self join with wrong aliases (18 Aug 2025, shortened)
 
 **Query**
 ```sql
@@ -51,7 +53,7 @@ JOIN family parent ON child.parent_id = parent.id;
 ```
 A self join needs the same table twice with two different aliases, and the ON clause must use those aliases.
 
-## 4. Double quotes around a string (19 Aug 2025)
+## 4. Double quotes around a string (19 Aug 2025, verbatim)
 
 **Query**
 ```sql
@@ -67,7 +69,7 @@ WHERE dept_id IN (SELECT dept_id FROM employees WHERE emp_name = 'John');
 ```
 In PostgreSQL double quotes mean an identifier (a column), single quotes mean a string.
 
-## 5. Alias used in WHERE, aggregate in WHERE (20 Aug 2025)
+## 5. Alias used in WHERE, aggregate in WHERE (20 Aug 2025, re-created)
 
 **Query**
 ```sql
@@ -83,9 +85,9 @@ SELECT payment_id, amount
 FROM payment
 WHERE amount > (SELECT AVG(amount) FROM payment);
 ```
-A SELECT alias cannot be used in WHERE, and an aggregate cannot be compared in WHERE. Use a subquery.
+A SELECT alias cannot be used in WHERE, and an aggregate cannot be compared in WHERE. Use a subquery. (Original ran on the Chinook `track` table; re-created here on `payment`.)
 
-## 6. Correlated subquery without the outer alias (19 Aug 2025)
+## 6. Correlated subquery without the outer alias (19 Aug 2025, re-created)
 
 **Query**
 ```sql
@@ -101,7 +103,7 @@ WHERE e.salary > (SELECT AVG(salary) FROM employees WHERE dept_id = e.dept_id);
 ```
 The outer table needs the alias `e` for the inner query to refer to it.
 
-## 7. HAVING with a plain subquery (20 Aug 2025)
+## 7. HAVING with a plain subquery (20 Aug 2025, re-created)
 
 **Query**
 ```sql
@@ -119,8 +121,8 @@ GROUP BY mode
 HAVING COUNT(*) > 2
 ORDER BY n DESC, mode LIMIT 1;
 ```
-`HAVING` needs a true/false condition on the group.
+`HAVING` needs a true/false condition on the group. (Original ran on the Chinook `genre` and `invoice` tables; re-created here.)
 
 ## 8. LIMIT syntax error (17 Aug 2025)
 
-PostgreSQL returned `ERROR: syntax error at or near "LIMIT"` (SQL state 42601) while practising `ORDER BY` with `LIMIT`. The query that caused it was not saved. The working form is `SELECT ... FROM payment ORDER BY amount DESC LIMIT 3;` (LIMIT last, after ORDER BY).
+PostgreSQL returned `ERROR: syntax error at or near "LIMIT"` (SQL state 42601) while practising `ORDER BY` with `LIMIT`. The query that caused it was not saved. The working form is `SELECT ... FROM payment ORDER BY amount DESC LIMIT 3;` (LIMIT last, after ORDER BY), see `queries/01_select_filter_sort.sql`.
