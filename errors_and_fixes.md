@@ -67,6 +67,24 @@ WHERE dept_id IN (SELECT dept_id FROM employees WHERE emp_name = 'John');
 ```
 In PostgreSQL double quotes mean an identifier (a column), single quotes mean a string.
 
+## 5. Alias used in WHERE, aggregate in WHERE (20 Aug 2025)
+
+**Query**
+```sql
+SELECT p.payment_id, AVG(p.amount) AS al
+FROM payment p
+WHERE p.amount > al;
+```
+**PostgreSQL said:** `column "al" does not exist`
+
+**Fix**
+```sql
+SELECT payment_id, amount
+FROM payment
+WHERE amount > (SELECT AVG(amount) FROM payment);
+```
+A SELECT alias cannot be used in WHERE, and an aggregate cannot be compared in WHERE. Use a subquery.
+
 ## 6. Correlated subquery without the outer alias (19 Aug 2025)
 
 **Query**
@@ -82,6 +100,26 @@ SELECT emp_name FROM employees e
 WHERE e.salary > (SELECT AVG(salary) FROM employees WHERE dept_id = e.dept_id);
 ```
 The outer table needs the alias `e` for the inner query to refer to it.
+
+## 7. HAVING with a plain subquery (20 Aug 2025)
+
+**Query**
+```sql
+SELECT mode, COUNT(*) AS n FROM payment
+GROUP BY mode
+HAVING (SELECT city FROM customer)
+ORDER BY n DESC LIMIT 1;
+```
+**PostgreSQL said:** `argument of HAVING must be type boolean, not type text`
+
+**Fix**
+```sql
+SELECT mode, COUNT(*) AS n FROM payment
+GROUP BY mode
+HAVING COUNT(*) > 2
+ORDER BY n DESC, mode LIMIT 1;
+```
+`HAVING` needs a true/false condition on the group.
 
 ## 8. LIMIT syntax error (17 Aug 2025)
 
